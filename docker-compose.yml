@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Banco de dados PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: word_game_db
+    restart: always
+    environment:
+      POSTGRES_DB: word_game
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - word_game_network
+
+  # Aplicação NestJS (opcional - para desenvolvimento use npm run start:dev)
+  app:
+    build: .
+    container_name: word_game_app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: word_game
+      JWT_SECRET: your-super-secret-jwt-key-for-development
+      JWT_EXPIRES_IN: 24h
+    depends_on:
+      - postgres
+    networks:
+      - word_game_network
+    # Para desenvolvimento, descomente as linhas abaixo para hot reload
+    # volumes:
+    #   - .:/app
+    #   - /app/node_modules
+
+volumes:
+  postgres_data:
+
+networks:
+  word_game_network:
+    driver: bridge
