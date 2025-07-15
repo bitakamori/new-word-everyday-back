@@ -1,4 +1,4 @@
-# Word Game Backend API
+# New Word Everyday Game Backend API
 
 Backend NestJS para um jogo de palavras onde usuários podem adicionar palavras validadas por API externa e ganhar pontos.
 

@@ -1,6 +1,7 @@
-import { Controller, Post, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 export class RegisterDto {
   nickname: string;
@@ -68,5 +69,26 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Credenciais inválidas' })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto.nickname, loginDto.password);
+  }
+
+  @Get('profile')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obter perfil do usuário logado' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Dados do usuário',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'number' },
+        nickname: { type: 'string' },
+        points: { type: 'number' }
+      }
+    }
+  })
+  @ApiResponse({ status: 401, description: 'Token inválido' })
+  async getProfile(@Request() req) {
+    return this.authService.getProfile(req.user.userId);
   }
 }

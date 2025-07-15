@@ -1,4 +1,4 @@
-# ✅ Word Game Backend - Projeto Concluído
+# ✅ New Word Everyday Game Backend - Projeto Concluído
 
 ## 🎯 O que foi implementado
 

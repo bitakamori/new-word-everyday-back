@@ -1,7 +1,7 @@
 @echo off
-REM Script de configuração rápida do projeto Word Game Backend
+REM Script de configuração rápida do projeto New Word Everyday Game Backend
 
-echo 🚀 Configurando o projeto Word Game Backend...
+echo 🚀 Configurando o projeto New Word Everyday Game Backend...
 
 REM 1. Criar arquivo .env se não existir
 if not exist .env (

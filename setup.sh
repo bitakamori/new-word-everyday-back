@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Script de configuração rápida do projeto Word Game Backend
+# Script de configuração rápida do projeto New Word Everyday Game Backend
 
-echo "🚀 Configurando o projeto Word Game Backend..."
+echo "🚀 Configurando o projeto New Word Everyday Game Backend..."
 
 # 1. Criar arquivo .env se não existir
 if [ ! -f .env ]; then

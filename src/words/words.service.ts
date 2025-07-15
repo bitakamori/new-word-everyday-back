@@ -22,17 +22,17 @@ export class WordsService {
     });
 
     if (existingWord) {
-      throw new ConflictException('Word already added by this user');
+      throw new ConflictException('Palavra já adicionada por este usuário');
     }
 
     // Verificar se a palavra existe no dicionário
     try {
       const isValidWord = await this.validateWordInDictionary(word);
       if (!isValidWord) {
-        throw new BadRequestException('Word not found in dictionary');
+        throw new BadRequestException('Palavra não encontrada no dicionário');
       }
     } catch (error) {
-      throw new BadRequestException('Error validating word in dictionary');
+      throw new BadRequestException('Está palavra não é válida');
     }
 
     // Calcular pontos (número de letras)
@@ -51,7 +51,7 @@ export class WordsService {
     return {
       word: newWord.word,
       points,
-      message: `Word added successfully! You earned ${points} points.`,
+      message: `Palavra adicionada com sucesso! Você ganhou ${points} pontos.`,
     };
   }
 

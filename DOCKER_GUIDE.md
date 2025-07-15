@@ -1,4 +1,4 @@
-# 🐳 Docker Commands para Word Game Backend
+# 🐳 Docker Commands para New Word Everyday Game Backend
 
 ## Comandos Essenciais
 
