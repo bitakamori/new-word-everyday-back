@@ -37,8 +37,8 @@ async function bootstrap() {
     },
   });
 
-  await app.listen(process.env.PORT ?? 3000);
-  console.log(`🚀 Aplicação rodando em: http://localhost:${process.env.PORT ?? 3000}`);
-  console.log(`📚 Documentação Swagger disponível em: http://localhost:${process.env.PORT ?? 3000}/api`);
+  await app.listen(process.env.PORT ?? 3001);
+  console.log(`🚀 Aplicação rodando em: http://localhost:${process.env.PORT ?? 3001}`);
+  console.log(`📚 Documentação Swagger disponível em: http://localhost:${process.env.PORT ?? 3001}/api`);
 }
 bootstrap();
