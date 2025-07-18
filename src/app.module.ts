@@ -15,6 +15,7 @@ import { RankingModule } from './ranking/ranking.module';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
+      url: process.env.DATABASE_URL,
       host: process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT || '5432'),
       username: process.env.DB_USERNAME || 'postgres',
@@ -22,6 +23,7 @@ import { RankingModule } from './ranking/ranking.module';
       database: process.env.DB_DATABASE || 'word_game',
       autoLoadEntities: true,
       synchronize: true, // Apenas para desenvolvimento
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     }),
     AuthModule,
     UsersModule,
