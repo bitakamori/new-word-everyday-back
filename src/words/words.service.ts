@@ -1,21 +1,50 @@
-import { Injectable, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { Word } from './word.entity';
+import { User } from '../users/user.entity';
 import { UsersService } from '../users/users.service';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class WordsService {
+  private logger = new Logger(WordsService.name);
+  private readonly DAILY_WORD_LIMIT = 5; // 5 palavras por dia
+
   constructor(
     @InjectRepository(Word)
     private wordsRepository: Repository<Word>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
     private usersService: UsersService,
     private httpService: HttpService,
   ) {}
 
   async addWord(word: string, userId: number) {
+    // Verificar limite diário
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('Usuário não encontrado');
+    }
+
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const userLastDate = user.lastWordDate ? 
+      new Date(user.lastWordDate).toISOString().split('T')[0] : null;
+
+    // Reset contador se mudou o dia
+    if (userLastDate !== today) {
+      user.dailyWordsCount = 0;
+      user.lastWordDate = new Date();
+    }
+
+    // Verificar se excedeu o limite diário
+    if (user.dailyWordsCount >= this.DAILY_WORD_LIMIT) {
+      throw new BadRequestException(
+        `Limite diário de ${this.DAILY_WORD_LIMIT} palavras atingido. Tente novamente amanhã!`
+      );
+    }
+
     // Verificar se a palavra já existe para este usuário
     const existingWord = await this.wordsRepository.findOne({
       where: { word: word.toLowerCase(), userId },
@@ -45,13 +74,43 @@ export class WordsService {
     });
     await this.wordsRepository.save(newWord);
 
+    // Atualizar contador diário e pontos do usuário
+    user.dailyWordsCount += 1;
+    user.lastWordDate = new Date();
+    await this.usersRepository.save(user);
+
     // Adicionar pontos ao usuário
     await this.usersService.addPoints(userId, points);
 
     return {
       word: newWord.word,
       points,
-      message: `Palavra adicionada com sucesso! Você ganhou ${points} pontos.`,
+      dailyWordsRemaining: this.DAILY_WORD_LIMIT - user.dailyWordsCount,
+      message: `Palavra adicionada com sucesso! Você ganhou ${points} pontos. Restam ${this.DAILY_WORD_LIMIT - user.dailyWordsCount} palavras hoje.`,
+    };
+  }
+
+  async getDailyStatus(userId: number) {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('Usuário não encontrado');
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const userLastDate = user.lastWordDate ? 
+      new Date(user.lastWordDate).toISOString().split('T')[0] : null;
+
+    // Reset se mudou o dia
+    let dailyCount = user.dailyWordsCount;
+    if (userLastDate !== today) {
+      dailyCount = 0;
+    }
+
+    return {
+      dailyWordsUsed: dailyCount,
+      dailyWordsRemaining: this.DAILY_WORD_LIMIT - dailyCount,
+      dailyLimit: this.DAILY_WORD_LIMIT,
+      resetTime: new Date(Date.now() + (24 * 60 * 60 * 1000)), // Próximo reset
     };
   }
 

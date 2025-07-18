@@ -20,8 +20,28 @@ export class WordsController {
   constructor(private wordsService: WordsService) {}
 
   @UseGuards(JwtAuthGuard)
+  @Get('daily-status')
+  @ApiOperation({ summary: 'Verificar status diário de palavras' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Status diário retornado com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        dailyWordsUsed: { type: 'number' },
+        dailyWordsRemaining: { type: 'number' },
+        dailyLimit: { type: 'number' },
+        resetTime: { type: 'string' }
+      }
+    }
+  })
+  async getDailyStatus(@Request() req) {
+    return this.wordsService.getDailyStatus(req.user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('add')
-  @Throttle({ default: { limit: 20, ttl: 60000 } }) // 20 palavras por minuto
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 palavras por minuto
   @ApiOperation({ summary: 'Adicionar nova palavra' })
   @ApiBody({ 
     type: AddWordDto,

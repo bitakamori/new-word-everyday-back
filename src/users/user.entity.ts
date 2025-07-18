@@ -15,6 +15,12 @@ export class User {
   @Column({ default: 0 })
   points: number;
 
+  @Column({ default: 0 })
+  dailyWordsCount: number;
+
+  @Column({ type: 'date', nullable: true })
+  lastWordDate: Date;
+
   @OneToMany(() => Word, (word: Word) => word.user)
   words: Word[];
 }
