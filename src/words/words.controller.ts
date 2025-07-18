@@ -1,9 +1,15 @@
 import { Controller, Post, Get, Body, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, Length, Matches } from 'class-validator';
+import { Throttle } from '@nestjs/throttler';
 import { WordsService } from './words.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 export class AddWordDto {
+  @IsString()
+  @IsNotEmpty()
+  @Length(2, 20, { message: 'Palavra deve ter entre 2 e 20 caracteres' })
+  @Matches(/^[a-zA-Z]+$/, { message: 'Palavra deve conter apenas letras' })
   word: string;
 }
 
@@ -15,6 +21,7 @@ export class WordsController {
 
   @UseGuards(JwtAuthGuard)
   @Post('add')
+  @Throttle({ default: { limit: 20, ttl: 60000 } }) // 20 palavras por minuto
   @ApiOperation({ summary: 'Adicionar nova palavra' })
   @ApiBody({ 
     type: AddWordDto,

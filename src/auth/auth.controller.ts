@@ -1,15 +1,30 @@
 import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, Length, Matches } from 'class-validator';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 export class RegisterDto {
+  @IsString()
+  @IsNotEmpty()
+  @Length(3, 20, { message: 'Nickname deve ter entre 3 e 20 caracteres' })
+  @Matches(/^[a-zA-Z0-9_]+$/, { message: 'Nickname deve conter apenas letras, números e underscore' })
   nickname: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Length(6, 50, { message: 'Senha deve ter entre 6 e 50 caracteres' })
   password: string;
 }
 
 export class LoginDto {
+  @IsString()
+  @IsNotEmpty()
   nickname: string;
+
+  @IsString()
+  @IsNotEmpty()
   password: string;
 }
 
@@ -19,6 +34,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
+  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 registros por minuto
   @ApiOperation({ summary: 'Registrar novo usuário' })
   @ApiBody({ 
     type: RegisterDto,
@@ -39,6 +55,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 logins por minuto
   @ApiOperation({ summary: 'Fazer login' })
   @ApiBody({ 
     type: LoginDto,
