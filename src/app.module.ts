@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -13,6 +15,11 @@ import { RankingModule } from './ranking/ranking.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    // Rate limiting: 10 requisições por minuto por IP
+    ThrottlerModule.forRoot([{
+      ttl: 60000, // 1 minuto
+      limit: 10,  // 10 requisições
+    }]),
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: process.env.DATABASE_URL,
@@ -31,6 +38,12 @@ import { RankingModule } from './ranking/ranking.module';
     RankingModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

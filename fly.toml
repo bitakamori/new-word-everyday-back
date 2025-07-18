@@ -18,16 +18,18 @@ primary_region = 'gig'
   auto_stop_machines = 'suspend'
   auto_start_machines = true
   min_machines_running = 0
+  max_machines_running = 1  # Máximo 1 máquina para controlar custos
   processes = ['app']
 
   [[http_service.checks]]
     interval = '15s'
-    timeout = '2s'
-    grace_period = '1s'
+    timeout = '10s'
+    grace_period = '5s'
     method = 'get'
     path = '/'
 
+# Configurações de recursos limitados para controlar custos
 [[vm]]
-  memory = '1gb'
+  memory = '512mb'  # Memória limitada
   cpu_kind = 'shared'
   cpus = 1
