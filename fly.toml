@@ -1,16 +1,17 @@
-# fly.toml app configuration file generated for new-word-everyday-back on 2025-07-15T19:49:01Z
+# fly.toml app configuration file generated for new-word-backend-v3 on 2025-09-29T12:39:26-03:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'new-word-everyday-back'
-primary_region = 'gig'
+app = 'new-word-backend-v3'
+primary_region = 'gru'
 
 [build]
+  dockerfile = 'Dockerfile.simple'
 
 [env]
-  NODE_ENV = "production"
-  PORT = "3000"
+  NODE_ENV = 'production'
+  PORT = '3000'
 
 [http_service]
   internal_port = 3000
@@ -18,7 +19,6 @@ primary_region = 'gig'
   auto_stop_machines = 'suspend'
   auto_start_machines = true
   min_machines_running = 0
-  max_machines_running = 1  # Máximo 1 máquina para controlar custos
   processes = ['app']
 
   [[http_service.checks]]
@@ -28,8 +28,7 @@ primary_region = 'gig'
     method = 'get'
     path = '/'
 
-# Configurações de recursos limitados para controlar custos
 [[vm]]
-  memory = '512mb'  # Memória limitada
+  memory = '512mb'
   cpu_kind = 'shared'
   cpus = 1
