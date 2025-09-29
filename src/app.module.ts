@@ -31,6 +31,22 @@ import { RankingModule } from './ranking/ranking.module';
       autoLoadEntities: true,
       synchronize: true, // Apenas para desenvolvimento
       ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      // Configurações para resolver ECONNRESET
+      extra: {
+        // Configurações de conexão para produção
+        max: 20, // máximo de conexões no pool
+        min: 5,  // mínimo de conexões no pool
+        idle_timeout: 30000, // 30 segundos
+        acquire_timeout: 60000, // 60 segundos
+        connectionTimeoutMillis: 30000, // timeout de conexão
+        idleTimeoutMillis: 30000, // timeout de idle
+        // Keep alive para evitar ECONNRESET
+        keepAlive: true,
+        keepAliveInitialDelayMillis: 0,
+      },
+      // Retry automático em caso de falha
+      retryAttempts: 3,
+      retryDelay: 3000, // 3 segundos entre tentativas
     }),
     AuthModule,
     UsersModule,
